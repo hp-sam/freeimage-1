@@ -6,14 +6,13 @@
 	mkdir dev
 	cd dev
 	git clone git@github.com:ninkigumi/freeimage.git
+	
+	cd freeimage
 
-	curl -O http://downloads.sourceforge.net/freeimage/FreeImage3154.zip
+	curl -L -O http://downloads.sourceforge.net/project/freeimage/Source%20Distribution/3.15.4/FreeImage3154.zip
 	unzip FreeImage3154.zip
 	cd FreeImage
-	
-	cp ../freeimage/Makefile.ios .
-	
-	make -f Makefile.ios
+
+	make -f ../Makefile.ios
 	lipo -create libfreeimage-iphone.a libfreeimage-iphonesimulator.a -output freeimage.a
-	
 	
