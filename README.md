@@ -5,7 +5,7 @@
 	cd
 	mkdir dev
 	cd dev
-	git clone git@github.com:ninkigumi/freeimage.git
+	git clone git://github.com/ninkigumi/freeimage.git
 	
 	cd freeimage
 
