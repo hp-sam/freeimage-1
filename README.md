@@ -1,6 +1,6 @@
 #FreeImage
 
-##MacOS X 10.8.2 iOS6.1
+##MacOS X 10.8.3 iOS6.1
 
 	cd
 	mkdir dev
