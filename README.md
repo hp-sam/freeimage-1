@@ -14,5 +14,5 @@
 	cd FreeImage
 
 	make -f ../Makefile.ios
-	lipo -create libfreeimage-iphone.a libfreeimage-iphonesimulator.a -output freeimage.a
+	lipo -create libfreeimage-armv7.a libfreeimage-armv7s.a -output freeimage.a
 	
