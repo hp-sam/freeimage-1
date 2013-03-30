@@ -30,7 +30,7 @@ EXTRA_LDFLAGS_SIM += -arch $(ARCH_SIM) -isysroot $(SDKROOT_SIM) -Wl,-dead_strip
 EXTRA_CFLAGS_SIM += -D__IPHONE_OS_VERSION_MIN_REQUIRED=50000 -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 EXTRA_LDFLAGS_SIM += -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 
-EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -pipe -mdynamic-no-pic -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
+EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
 EXTRA_LDFLAGS_PHONE += -arch $(ARCH_PHONE) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
 EXTRA_CFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 EXTRA_LDFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
