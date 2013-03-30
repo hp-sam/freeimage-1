@@ -3,8 +3,8 @@
 
 include Makefile.srcs
 
-CFLAGS =  -g -O2 -Wall -Wmissing-prototypes -std=c99 -ffast-math -fno-strict-aliasing
-CXXFLAGS =  -g -O2 -Wall -fno-strict-aliasing
+CFLAGS =  -g -O3 -Wall -Wmissing-prototypes -std=c99 -ffast-math -fno-strict-aliasing
+CXXFLAGS =  -g -O3 -Wall -fno-strict-aliasing
 
 GCC_VERSION = 4.2
 IPHONEOS_SDK = 6.1
@@ -31,15 +31,11 @@ EXTRA_LDFLAGS_SIM += -arch $(ARCH_SIM) -isysroot $(SDKROOT_SIM) -Wl,-dead_strip
 EXTRA_CFLAGS_SIM += -D__IPHONE_OS_VERSION_MIN_REQUIRED=50000 -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 EXTRA_LDFLAGS_SIM += -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 
-EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
-EXTRA_LDFLAGS_PHONE += -arch $(ARCH_PHONE) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
-EXTRA_CFLAGS_PHONE2 += -arch $(ARCH_PHONE2) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
-EXTRA_LDFLAGS_PHONE2 += -arch $(ARCH_PHONE2) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
+EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
+EXTRA_LDFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
 
 EXTRA_CFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 EXTRA_LDFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
-EXTRA_CFLAGS_PHONE2 += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
-EXTRA_LDFLAGS_PHONE2 += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 
 AR_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/ar
 AR_PHONE = $(PLATFORM_PHONE_DEVELOPER_BIN_DIR)/ar
@@ -55,24 +51,18 @@ LIBTOOL_SIM = $(DEVELOPER)/Platforms/$(PLATFORM_SIM).platform/Developer/usr/bin/
 
 CFLAGS_PHONE = $(CFLAGS) $(EXTRA_CFLAGS_PHONE)
 LDFLAGS_PHONE += $(EXTRA_LDFLAGS_PHONE)
-CFLAGS_PHONE2 = $(CFLAGS) $(EXTRA_CFLAGS_PHONE2)
-LDFLAGS_PHONE2 += $(EXTRA_LDFLAGS_PHONE2)
 CXX_PHONE = $(PLATFORM_PHONE_DEVELOPER_BIN_DIR)/llvm-g++-$(GCC_VERSION)
 CXXFLAGS_PHONE += $(CXXFLAGS) $(EXTRA_CFLAGS_PHONE) -fvisibility-inlines-hidden
-CXXFLAGS_PHONE2 += $(CXXFLAGS) $(EXTRA_CFLAGS_PHONE2) -fvisibility-inlines-hidden
 LIBTOOL_PHONE = $(DEVELOPER)/Platforms/$(PLATFORM_PHONE).platform/Developer/usr/bin/libtool
 
 TARGET = freeimage
 STATICLIB_SIM = lib$(TARGET)-$(ARCH_SIM).a
 STATICLIB_PHONE = lib$(TARGET)-$(ARCH_PHONE).a
-STATICLIB_PHONE2 = lib$(TARGET)-$(ARCH_PHONE2).a
 HEADER = Source/FreeImage.h
 
 .SUFFIXES: .o-i386 .o-armv7 .o-armv7s
 MODULES_ARMV7 = $(SRCS:.c=.o-armv7)
 MODULES_ARMV7 := $(MODULES_ARMV7:.cpp=.o-armv7)
-MODULES_ARMV7S = $(SRCS:.c=.o-armv7s)
-MODULES_ARMV7S := $(MODULES_ARMV7S:.cpp=.o-armv7s)
 MODULES_i386 = $(SRCS:.c=.o-i386)
 MODULES_i386 := $(MODULES_i386:.cpp=.o-i386)
 
@@ -96,10 +86,7 @@ $(STATICLIB_SIM): $(MODULES_i386)
 	$(CXX_SIM) $(CXXFLAGS_SIM) -c $< -o $@
 
 $(STATICLIB_PHONE): $(MODULES_ARMV7)
-	$(LIBTOOL_PHONE) -arch_only $(ARCH_PHONE) -o $@ $(MODULES_ARMV7)
-
-$(STATICLIB_PHONE2): $(MODULES_ARMV7S)
-	$(LIBTOOL_PHONE) -arch_only $(ARCH_PHONE2) -o $@ $(MODULES_ARMV7S)
+	$(LIBTOOL_PHONE) -o $@ $(MODULES_ARMV7)
 
 .c.o-armv7:
 	$(CC_PHONE) $(CFLAGS_PHONE) -c $< -o $@
@@ -107,13 +94,6 @@ $(STATICLIB_PHONE2): $(MODULES_ARMV7S)
 .cpp.o-armv7:
 	$(CXX_PHONE) $(CXXFLAGS_PHONE) -c $< -o $@
 
-.c.o-armv7s:
-	$(CC_PHONE) $(CFLAGS_PHONE2) -c $< -o $@
-
-.cpp.o-armv7s:
-	$(CXX_PHONE) $(CXXFLAGS_PHONE2) -c $< -o $@
-
 clean:
 	rm -f core Dist/*.* u2dtmp* $(MODULES_i386) $(MODULES_ARMV7) $(MODULES_ARMV7S) $(STATICLIB_SIM) $(STATICLIB_PHONE) $(STATICLIB_PHONE2)
-
 
