@@ -6,9 +6,8 @@ include Makefile.srcs
 CFLAGS =  -g -O3 -Wall -Wmissing-prototypes -std=c99 -ffast-math -fno-strict-aliasing
 CXXFLAGS =  -g -O3 -Wall -fno-strict-aliasing
 
-GCC_VERSION = 4.2
-IPHONEOS_SDK = 6.1
-IPHONEOS_DEPLOYMENT_TARGET = 6.1
+IPHONEOS_SDK = 9.0
+IPHONEOS_DEPLOYMENT_TARGET = 6.0
 MACOSX_SDK = 10.8
 MACOSX_DEPLOYMENT_TARGET = 10.8
 
@@ -16,8 +15,9 @@ PLATFORM_SIM = iPhoneSimulator
 PLATFORM_PHONE = iPhoneOS
 
 ARCH_SIM = i386
+ARCH_SIM2 = x86_64
 ARCH_PHONE = armv7
-ARCH_PHONE2 = armv7s
+ARCH_PHONE2 = arm64
 
 DEVELOPER=/Applications/Xcode.app/Contents/Developer
 PLATFORM_SIM_DEVELOPER_BIN_DIR = $(DEVELOPER)/Platforms/$(PLATFORM_SIM).platform/Developer/usr/bin
@@ -26,41 +26,41 @@ PLATFORM_PHONE_DEVELOPER_BIN_DIR = $(DEVELOPER)/Platforms/$(PLATFORM_PHONE).plat
 SDKROOT_SIM = $(DEVELOPER)/Platforms/$(PLATFORM_SIM).platform/Developer/SDKs/$(PLATFORM_SIM)$(IPHONEOS_SDK).sdk
 SDKROOT_PHONE = $(DEVELOPER)/Platforms/$(PLATFORM_PHONE).platform/Developer/SDKs/$(PLATFORM_PHONE)$(IPHONEOS_SDK).sdk
 
-EXTRA_CFLAGS_SIM += -arch $(ARCH_SIM) -pipe -mdynamic-no-pic -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_SIM)
-EXTRA_LDFLAGS_SIM += -arch $(ARCH_SIM) -isysroot $(SDKROOT_SIM) -Wl,-dead_strip
+EXTRA_CFLAGS_SIM += -arch $(ARCH_SIM) -arch $(ARCH_SIM2) -pipe -mdynamic-no-pic -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_SIM)
+EXTRA_LDFLAGS_SIM += -arch $(ARCH_SIM) -arch $(ARCH_SIM2) -isysroot $(SDKROOT_SIM) -Wl,-dead_strip
 EXTRA_CFLAGS_SIM += -D__IPHONE_OS_VERSION_MIN_REQUIRED=50000 -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 EXTRA_LDFLAGS_SIM += -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 
 EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
 EXTRA_LDFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
 
-EXTRA_CFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
-EXTRA_LDFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
+EXTRA_CFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET) -D__ANSI__
+EXTRA_LDFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET) -D__ANSI__
 
 AR_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/ar
 AR_PHONE = $(PLATFORM_PHONE_DEVELOPER_BIN_DIR)/ar
 
-CC_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/llvm-gcc-$(GCC_VERSION)
-CC_PHONE = $(PLATFORM_PHONE_DEVELOPER_BIN_DIR)/llvm-gcc-$(GCC_VERSION)
+CC_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/gcc
+CC_PHONE = $(DEVELOPER)/usr/bin/gcc
 
 CFLAGS_SIM = $(CFLAGS) $(EXTRA_CFLAGS_SIM)
 LDFLAGS_SIM = $(EXTRA_LDFLAGS_SIM)
-CXX_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/llvm-g++-$(GCC_VERSION)
+CXX_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/g++
 CXXFLAGS_SIM += $(CXXFLAGS) $(EXTRA_CFLAGS_SIM) -fvisibility-inlines-hidden
-LIBTOOL_SIM = $(DEVELOPER)/Platforms/$(PLATFORM_SIM).platform/Developer/usr/bin/libtool
+LIBTOOL_SIM = $(DEVELOPER)/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool
 
 CFLAGS_PHONE = $(CFLAGS) $(EXTRA_CFLAGS_PHONE)
 LDFLAGS_PHONE += $(EXTRA_LDFLAGS_PHONE)
-CXX_PHONE = $(PLATFORM_PHONE_DEVELOPER_BIN_DIR)/llvm-g++-$(GCC_VERSION)
+CXX_PHONE = $(DEVELOPER)/usr/bin/g++
 CXXFLAGS_PHONE += $(CXXFLAGS) $(EXTRA_CFLAGS_PHONE) -fvisibility-inlines-hidden
-LIBTOOL_PHONE = $(DEVELOPER)/Platforms/$(PLATFORM_PHONE).platform/Developer/usr/bin/libtool
+LIBTOOL_PHONE = $(DEVELOPER)/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool
 
 TARGET = freeimage
 STATICLIB_SIM = lib$(TARGET)-$(ARCH_SIM).a
 STATICLIB_PHONE = lib$(TARGET)-$(ARCH_PHONE).a
 HEADER = Source/FreeImage.h
 
-.SUFFIXES: .o-i386 .o-armv7 .o-armv7s
+.SUFFIXES: .o-i386 .o-armv7 .o-arm64
 MODULES_ARMV7 = $(SRCS:.c=.o-armv7)
 MODULES_ARMV7 := $(MODULES_ARMV7:.cpp=.o-armv7)
 MODULES_i386 = $(SRCS:.c=.o-i386)
@@ -74,10 +74,10 @@ dist: FreeImage
 	cp *.a Dist
 	cp Source/FreeImage.h Dist
 
-FreeImage: $(STATICLIB_SIM) $(STATICLIB_PHONE) $(STATICLIB_PHONE2)
+FreeImage: $(STATICLIB_PHONE) $(STATICLIB_SIM)
 
 $(STATICLIB_SIM): $(MODULES_i386)
-	$(LIBTOOL_SIM) -arch_only i386 -o $@ $(MODULES_i386)
+	$(LIBTOOL_SIM) -o $@ $(MODULES_i386)
 
 .c.o-i386:
 	$(CC_SIM) $(CFLAGS_SIM) -c $< -o $@
