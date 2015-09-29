@@ -688,7 +688,7 @@ U32 load4BE(void* pv)
 #ifdef _BIG__ENDIAN_
     return (*(U32*)pv);
 #else // _BIG__ENDIAN_
-#if defined(_M_IA64) || defined(_ARM_)
+#if defined(_M_IA64) || defined(_ARM_) || defined(_ARM64_)
     U32  v;
     v = ((U16 *) pv)[0];
     v |= ((U32)((U16 *) pv)[1]) << 16;

@@ -1,2 +1,4 @@
 .DS_Store
+*.o-i386
+*.o-armv7
 
