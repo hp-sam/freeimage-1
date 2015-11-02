@@ -3,8 +3,8 @@
 
 include Makefile.srcs
 
-CFLAGS =  -g -O3 -Wall -Wmissing-prototypes -std=c99 -ffast-math -fno-strict-aliasing
-CXXFLAGS =  -g -O3 -Wall -fno-strict-aliasing
+CFLAGS =  -g -O3 -Wall -Wmissing-prototypes -std=c99 -ffast-math -fno-strict-aliasing -fembed-bitcode
+CXXFLAGS =  -g -O3 -Wall -fno-strict-aliasing -fembed-bitcode
 
 IPHONEOS_SDK = 9.0
 IPHONEOS_DEPLOYMENT_TARGET = 6.0
@@ -18,6 +18,7 @@ ARCH_SIM = i386
 ARCH_SIM2 = x86_64
 ARCH_PHONE = armv7
 ARCH_PHONE2 = arm64
+ARCH_PHONE3 = armv7s
 
 DEVELOPER=/Applications/Xcode.app/Contents/Developer
 PLATFORM_SIM_DEVELOPER_BIN_DIR = $(DEVELOPER)/Platforms/$(PLATFORM_SIM).platform/Developer/usr/bin
@@ -28,13 +29,13 @@ SDKROOT_PHONE = $(DEVELOPER)/Platforms/$(PLATFORM_PHONE).platform/Developer/SDKs
 
 EXTRA_CFLAGS_SIM += -arch $(ARCH_SIM) -arch $(ARCH_SIM2) -pipe -mdynamic-no-pic -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_SIM)
 EXTRA_LDFLAGS_SIM += -arch $(ARCH_SIM) -arch $(ARCH_SIM2) -isysroot $(SDKROOT_SIM) -Wl,-dead_strip
-EXTRA_CFLAGS_SIM += -D__IPHONE_OS_VERSION_MIN_REQUIRED=50000 -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET) -D__ANSI__
-EXTRA_LDFLAGS_SIM += -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
+EXTRA_CFLAGS_SIM += -D__IPHONE_OS_VERSION_MIN_REQUIRED=50000 -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DPNG_ARM_NEON_OPT=0
+EXTRA_LDFLAGS_SIM += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 
-EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
-EXTRA_LDFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
+EXTRA_CFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -arch $(ARCH_PHONE3) -pipe -fvisibility=hidden $(INCLUDE) -isysroot $(SDKROOT_PHONE)
+EXTRA_LDFLAGS_PHONE += -arch $(ARCH_PHONE) -arch $(ARCH_PHONE2) -arch $(ARCH_PHONE3) -isysroot $(SDKROOT_PHONE) -Wl,-dead_strip
 
-EXTRA_CFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET) -D__ANSI__
+EXTRA_CFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET) -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DPNG_ARM_NEON_OPT=0
 EXTRA_LDFLAGS_PHONE += -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 
 AR_SIM = $(PLATFORM_SIM_DEVELOPER_BIN_DIR)/ar
@@ -71,7 +72,8 @@ default: all
 all: dist
 
 dist: FreeImage
-	cp *.a Dist
+	lipo -create libfreeimage-armv7.a libfreeimage-i386.a -output libfreeimage.a
+	mv *.a Dist
 	cp Source/FreeImage.h Dist
 
 FreeImage: $(STATICLIB_PHONE) $(STATICLIB_SIM)
